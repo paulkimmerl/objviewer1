@@ -44,8 +44,16 @@
         // Szene
         scene = new THREE.Scene();
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
-        scene.add(ambientLight);
+        // Licht ersetzen: kein AmbientLight mehr
+        // DirectionalLight simuliert Sonnenlicht
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 7);
+        scene.add(directionalLight);
+
+        // PointLight als Fülllicht von vorne
+        const pointLight = new THREE.PointLight(0xffffff, 0.6);
+        pointLight.position.set(0, 2, 5);
+        scene.add(pointLight);
 
         // Modell laden
         const loader = new THREE.OBJLoader();
@@ -65,8 +73,8 @@
         controls.enableDamping = true;
         controls.dampingFactor = 0.1;
         controls.enableZoom = true;              // Zoom aktivieren
-        controls.minDistance = 0.5;              // Optional: nahester Zoom
-        controls.maxDistance = 10;               // Optional: weitester Zoom
+        controls.minDistance = 0.5;              // nahester Zoom
+        controls.maxDistance = 10;               // weitester Zoom
 
         // Events
         window.addEventListener('resize', onWindowResize, false);
