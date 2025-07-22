@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Three.js OBJ Viewer mit Touch Zoom</title>
+  <title>Three.js OBJ Viewer mit PBR Material & Schatten</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
   <style>
     body {
       margin: 0; overflow: hidden;
       background: hsl(0,0%,10%);
-      touch-action: none; /* Wichtig: erlaubt Touch Events für Zoom, Dreh */
+      touch-action: none; /* Wichtig für Touch Zoom */
     }
   </style>
 </head>
@@ -16,6 +16,7 @@
   <script src="three.js"></script>
   <script src="OrbitControls.js"></script>
   <script src="OBJLoader.js"></script>
+
   <script>
     let container, camera, scene, renderer, controls;
 
@@ -35,6 +36,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setClearColor(new THREE.Color('hsl(0,0%,10%)'));
       renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
       // Controls mit Zoom und Touch-Gesten
@@ -45,13 +47,17 @@
       controls.minDistance = 0.5;
       controls.maxDistance = 10;
 
-      // Licht
+      // Licht Setup
       let ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
       scene.add(ambientLight);
 
       let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
       directionalLight.position.set(5, 10, 7.5);
       directionalLight.castShadow = true;
+      directionalLight.shadow.mapSize.width = 1024;
+      directionalLight.shadow.mapSize.height = 1024;
+      directionalLight.shadow.camera.near = 0.5;
+      directionalLight.shadow.camera.far = 50;
       scene.add(directionalLight);
 
       // Boden für Schatten
@@ -69,13 +75,15 @@
       loader.load('model.obj', function(object){
         object.traverse(function(child){
           if(child.isMesh){
+            child.castShadow = true;
+            child.receiveShadow = true;
+
+            // Material als PBR-Material (MeshStandardMaterial)
             child.material = new THREE.MeshStandardMaterial({
               color: 0xffffff,
               metalness: 0.5,
               roughness: 0.5
             });
-            child.castShadow = true;
-            child.receiveShadow = true;
           }
         });
         object.position.y = 0.1;
