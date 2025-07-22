@@ -2,12 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>3D Viewer – Dezente Wanderlichter</title>
+  <title>3D Viewer mit Bloom und Nebel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="three.js"></script>
   <script src="Detector.js"></script>
   <script src="OrbitControls.js"></script>
   <script src="OBJLoader.js"></script>
+
+  <!-- Bloom-Effekte -->
+  <script src="postprocessing/EffectComposer.js"></script>
+  <script src="postprocessing/RenderPass.js"></script>
+  <script src="postprocessing/UnrealBloomPass.js"></script>
 
   <style>
     html, body {
@@ -25,6 +30,7 @@
 if (!Detector.webgl) Detector.addGetWebGLMessage();
 
 let container, camera, controls, scene, renderer;
+let composer, bloomPass;
 let light1, light2, light3;
 let time = 0;
 
@@ -40,14 +46,15 @@ function init() {
 
   scene = new THREE.Scene();
 
+  // 🌫️ Dunkler Nebel
+  scene.fog = new THREE.FogExp2(0x111111, 0.35);
+
   // Gedimmte weiße wandernde Punktlichter
   light1 = new THREE.PointLight(0xffffff, 0.2, 10);
   light2 = new THREE.PointLight(0xffffff, 0.15, 10);
   light3 = new THREE.PointLight(0xffffff, 0.1, 10);
 
-  scene.add(light1);
-  scene.add(light2);
-  scene.add(light3);
+  scene.add(light1, light2, light3);
 
   // Modell laden
   const loader = new THREE.OBJLoader();
@@ -59,13 +66,28 @@ function init() {
   // Renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
   container.appendChild(renderer.domElement);
+
+  // ✨ Postprocessing: Bloom
+  composer = new THREE.EffectComposer(renderer);
+  const renderPass = new THREE.RenderPass(scene, camera);
+  bloomPass = new THREE.UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    0.4, // strength
+    0.6, // radius
+    0.85 // threshold
+  );
+  composer.addPass(renderPass);
+  composer.addPass(bloomPass);
 
   // Steuerung
   controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.1;
   controls.enableZoom = true;
+  controls.minDistance = 0.5;
+  controls.maxDistance = 10;
 
   window.addEventListener('resize', onWindowResize, false);
 }
@@ -74,19 +96,20 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
 }
 
 function animate() {
   requestAnimationFrame(animate);
   time += 0.01;
 
-  // Lichtbewegung: sanft und dezent
+  // Bewegte Lichtquellen
   light1.position.set(Math.sin(time * 1.5) * 1.5, Math.cos(time * 1.0) * 1.5, Math.sin(time) * 1.5);
   light2.position.set(Math.cos(time * 1.3) * 1.2, Math.sin(time * 0.8) * 1.5, Math.cos(time) * 1.2);
   light3.position.set(Math.sin(time * 1.1) * 1.0, Math.cos(time * 1.2) * 1.0, Math.sin(time * 0.5) * 1.5);
 
   controls.update();
-  renderer.render(scene, camera);
+  composer.render();
 }
 </script>
 
