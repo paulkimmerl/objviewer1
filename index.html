@@ -110,15 +110,10 @@
 //                 materials.materials.material_0.map.magFilter = THREE.NearestFilter;
 //                 materials.materials.material_0.map.minFilter = THREE.LinearFilter;
 
-                var objLoader = new THREE.OBJLoader();
-//                 objLoader.setMaterials(materials);
                 objLoader.setPath('assets/');
-                objLoader.load('model
-                              .obj', function (object) {
-
-                    scene.add(object);
-
-//                 });
+objLoader.load('model.obj', function (object) {
+    scene.add(object);
+});
 
             });
 
