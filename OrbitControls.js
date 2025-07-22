@@ -55,7 +55,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	// Set to false to disable rotating
 	this.enableRotate = true;
-	this.rotateSpeed = 0.1;
+	this.rotateSpeed = 0.01;
 
 	// Set to false to disable panning
 	this.enablePan = true;
@@ -64,7 +64,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 	// Set to true to automatically rotate around the target
 	// If auto-rotate is enabled, you must call controls.update() in your animation loop
 	this.autoRotate = true;
-	this.autoRotateSpeed = 0.1; // 30 seconds per round when fps is 60
+	this.autoRotateSpeed = 0.01; // 30 seconds per round when fps is 60
 
 	// Set to false to disable use of the keys
 	this.enableKeys = true;
