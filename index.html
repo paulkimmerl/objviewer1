@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-
     <title>WebGL 3D Model Viewer Using three.js</title>
-
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <script src="three.js"></script>
     <script src="Detector.js"></script>
@@ -19,115 +17,124 @@
             padding: 0;
             background: hsl(0, 0%, 10%);
         }
+        .left, .right {
+            position: absolute;
+            color: #fff;
+            font-family: Geneva, sans-serif;
+        }
+        .left {
+            bottom: 1em;
+            left: 1em;
+            text-align: left;
+        }
+        .right {
+            top: 0;
+            right: 0;
+            text-align: right;
+        }
+        a {
+            color: #f58231;
+        }
     </style>
-
 </head>
 <body>
+    <script>
+        if (!Detector.webgl) {
+            Detector.addGetWebGLMessage();
+        }
 
-<script>
-    if (!Detector.webgl) {
-        Detector.addGetWebGLMessage();
-    }
+        let container;
+        let camera, controls, scene, renderer;
+        let lighting, ambient, keyLight, fillLight, backLight;
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
 
-    let container;
-    let camera, controls, scene, renderer;
-    let ambientLight, directionalLight;
+        init();
+        animate();
 
-    init();
-    animate();
+        function init() {
+            container = document.createElement('div');
+            document.body.appendChild(container);
 
-    function init() {
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.z = 3;
 
-        container = document.createElement('div');
-        document.body.appendChild(container);
+            // Scene
+            scene = new THREE.Scene();
+            lighting = false;
 
-        // Kamera
-        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 1.5, 3);
+            ambient = new THREE.AmbientLight(0xffffff, 1.0);
+            scene.add(ambient);
 
-        // Szene
-        scene = new THREE.Scene();
+            keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
+            keyLight.position.set(-100, 0, 100);
 
-        // Renderer
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        container.appendChild(renderer.domElement);
+            fillLight = new THREE.DirectionalLight(new THREE.Color('hsl(240, 100%, 75%)'), 0.75);
+            fillLight.position.set(100, 0, 100);
 
-        // Licht
-        ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
-        scene.add(ambientLight);
+            backLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            backLight.position.set(100, 0, -100).normalize();
 
-        directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(5, 10, 7.5);
-        directionalLight.castShadow = true;
-
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
-        directionalLight.shadow.camera.near = 0.5;
-        directionalLight.shadow.camera.far = 50;
-        directionalLight.shadow.camera.left = -5;
-        directionalLight.shadow.camera.right = 5;
-        directionalLight.shadow.camera.top = 5;
-        directionalLight.shadow.camera.bottom = -5;
-
-        scene.add(directionalLight);
-
-        // Bodenplane für Schatten
-        const groundGeo = new THREE.PlaneGeometry(10, 10);
-        const groundMat = new THREE.ShadowMaterial({ opacity: 0.4 });
-        const ground = new THREE.Mesh(groundGeo, groundMat);
-        ground.rotation.x = - Math.PI / 2;
-        ground.position.y = 0;
-        ground.receiveShadow = true;
-        scene.add(ground);
-
-        // Modell laden
-        const objLoader = new THREE.OBJLoader();
-        objLoader.setPath('assets/');
-        objLoader.load('model.obj', function (object) {
-
-            object.traverse(function (child) {
-                if (child.isMesh) {
-                    // PBR Material mit Schatten aktivieren
-                    child.material = new THREE.MeshStandardMaterial({
-                        color: 0xffffff,
-                        metalness: 0.5,
-                        roughness: 0.5
-                    });
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                }
+            // Model
+            const objLoader = new THREE.OBJLoader();
+            objLoader.setPath('assets/');
+            objLoader.load('model.obj', function (object) {
+                scene.add(object);
             });
 
-            object.position.y = 0.1;
-            scene.add(object);
-        });
+            // Renderer
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
+            container.appendChild(renderer.domElement);
 
-        // Controls mit Zoom aktiv
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.25;
-        controls.enableZoom = true;  // Zoom aktiviert!
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.25;
+            controls.enableZoom = false;
 
-        window.addEventListener('resize', onWindowResize, false);
-    }
+            // Events
+            window.addEventListener('resize', onWindowResize, false);
+            window.addEventListener('keydown', onKeyboardEvent, false);
+        }
 
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
 
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
+        function onKeyboardEvent(e) {
+            if (e.code === 'KeyL') {
+                lighting = !lighting;
+                if (lighting) {
+                    ambient.intensity = 0.25;
+                    scene.add(keyLight);
+                    scene.add(fillLight);
+                    scene.add(backLight);
+                } else {
+                    ambient.intensity = 1.0;
+                    scene.remove(keyLight);
+                    scene.remove(fillLight);
+                    scene.remove(backLight);
+                }
+            }
+        }
 
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
-    }
-</script>
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            render();
+        }
 
+        function render() {
+            renderer.render(scene, camera);
+        }
+    </script>
 </body>
 </html>
