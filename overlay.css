@@ -1,126 +1,95 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Blurred Overlay mit Text oben und unten</title>
-<style>
-  body, html {
-    margin: 0; padding: 0;
-    height: 100%;
-    font-family: "Times New Roman", serif;
-    background: url('https://picsum.photos/1920/1080') no-repeat center center fixed;
-    background-size: cover;
-    color: #ddd;
-    text-shadow: 0 0 3px rgba(0,0,0,0.7);
-  }
+/* Blurred Overlay mit rechteckigem Sichtfenster */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  pointer-events: none;
 
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 10;
-    pointer-events: none;
+  /* Hintergrund: Blur + heller */
+  backdrop-filter: blur(8px) brightness(1.4);
+  -webkit-backdrop-filter: blur(8px) brightness(1.4);
 
-    backdrop-filter: blur(8px) brightness(1.2);
-    -webkit-backdrop-filter: blur(8px) brightness(1.2);
+  /* Rechteckige Maske mit größerem Abstand zum Rand */
+  mask: 
+    linear-gradient(black, black) content-box, 
+    linear-gradient(black, black);
+  -webkit-mask: 
+    linear-gradient(black, black) content-box, 
+    linear-gradient(black, black);
+  mask-composite: exclude;
+  -webkit-mask-composite: destination-out;
 
-    padding: 12vh 4vw 10vh 4vw;
-    box-sizing: border-box;
+  /* Abstand: oben 12vh, rechts 4vw, unten 10vh, links 4vw */
+  padding: 12vh 4vw 10vh 4vw;
+  box-sizing: border-box;
+}
 
-    mask:
-      linear-gradient(black, black) content-box,
-      linear-gradient(black, black);
-    -webkit-mask:
-      linear-gradient(black, black) content-box,
-      linear-gradient(black, black);
-    mask-composite: exclude;
-    -webkit-mask-composite: destination-out;
-  }
+/* Weiße Linienrahmen an den Ecken - dünner und feiner */
+body::after {
+  content: "";
+  position: fixed;
+  top: 12vh;
+  left: 4vw;
+  width: calc(100vw - 8vw);
+  height: calc(100vh - 22vh);
+  z-index: 101;
+  pointer-events: none;
 
-  body::after {
-    content: "";
-    position: fixed;
-    top: 12vh;
-    left: 4vw;
-    width: calc(100vw - 8vw);
-    height: calc(100vh - 22vh);
-    z-index: 11;
-    pointer-events: none;
+  background:
+    linear-gradient(to right, white 12px, transparent 0) top left,
+    linear-gradient(to bottom, white 12px, transparent 0) top left,
+    linear-gradient(to left, white 12px, transparent 0) top right,
+    linear-gradient(to bottom, white 12px, transparent 0) top right,
+    linear-gradient(to right, white 12px, transparent 0) bottom left,
+    linear-gradient(to top, white 12px, transparent 0) bottom left,
+    linear-gradient(to left, white 12px, transparent 0) bottom right,
+    linear-gradient(to top, white 12px, transparent 0) bottom right;
+  background-repeat: no-repeat;
+  background-size: 12px 1px, 1px 12px;
+}
 
-    background:
-      linear-gradient(to right, white 30px, transparent 0) top left,
-      linear-gradient(to bottom, white 30px, transparent 0) top left,
-      linear-gradient(to left, white 30px, transparent 0) top right,
-      linear-gradient(to bottom, white 30px, transparent 0) top right,
-      linear-gradient(to right, white 30px, transparent 0) bottom left,
-      linear-gradient(to top, white 30px, transparent 0) bottom left,
-      linear-gradient(to left, white 30px, transparent 0) bottom right,
-      linear-gradient(to top, white 30px, transparent 0) bottom right;
-    background-repeat: no-repeat;
-    background-size: 30px 2px, 2px 30px;
-  }
+/* Text oben als Pseudo-Element */
+body::before {
+  position: fixed;
+  z-index: 102;
+}
 
-  .text-container {
-    position: fixed;
-    width: 100vw;
-    left: 0;
-    z-index: 20;
-    pointer-events: none;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100vh;
-    box-sizing: border-box;
-    padding: 12vh 4vw 10vh 4vw;
-  }
+body::before::before {
+  content: "Paul Kimmerl (bolt) \A paul-kimmerl@gmx.de";
+  white-space: pre-line;
+  position: fixed;
+  top: 2vh;
+  left: 4vw;
+  color: #ddd;
+  font-family: "Times New Roman", serif;
+  font-size: 0.8rem;
+  font-weight: 300;
+  pointer-events: none;
+  user-select: none;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
 
-  .top-text {
-    align-self: flex-start;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    padding: 0.3em 0.6em;
-    border-radius: 4px;
-    max-width: 300px;
-    color: #ddd;
-    font-size: 0.9rem;
-    font-family: "Times New Roman", serif;
-    pointer-events: auto;
-    text-shadow: 0 0 3px rgba(0,0,0,0.8);
-  }
+/* Text unten als Pseudo-Element */
+body::after {
+  position: fixed;
+  z-index: 103;
+}
 
-  .bottom-text {
-    align-self: flex-end;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    padding: 0.3em 0.6em;
-    border-radius: 4px;
-    max-width: 400px;
-    color: #ddd;
-    font-size: 1rem;
-    font-family: "Times New Roman", serif;
-    pointer-events: auto;
-    text-align: right;
-    text-shadow: 0 0 3px rgba(0,0,0,0.8);
-  }
-</style>
-</head>
-<body>
-
-<div class="text-container">
-  <div class="top-text">
-    Paul Kimmerl (bolt)<br />
-    paul-kimmerl@gmx.de
-  </div>
-
-  <div class="bottom-text">
-    verloren zwischen Chaos und Kontrolle - in Liebe zur Ästhetik des Unbewussten
-  </div>
-</div>
-
-</body>
-</html>
+body::after::after {
+  content: "verloren zwischen Chaos und Kontrolle - in Liebe zur Ästhetik des Unbewussten";
+  position: fixed;
+  bottom: 2vh;
+  right: 4vw;
+  color: #ddd;
+  font-family: "Times New Roman", serif;
+  font-size: 0.8rem;
+  font-weight: 300;
+  pointer-events: none;
+  user-select: none;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  max-width: 400px;
+  text-align: right;
+}
