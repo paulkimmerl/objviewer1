@@ -100,8 +100,21 @@ function animate() {
 
   controls.update();
   renderer.render(scene, camera);
+
+  // Update Overlay Text mit aktuellen Werten
+  if (typeof updateOverlayText === 'function') {
+    updateOverlayText(
+      (controls.getDistance ? controls.getDistance().toFixed(2) + 'm' : 'N/A'),
+      Math.round(renderer.info.render.frame / ((performance.now()/1000)||1)) + ' FPS',
+      controls.enabled ? 'On' : 'Off',
+      'Lights: ' + [light1.intensity.toFixed(2), light2.intensity.toFixed(2), light3.intensity.toFixed(2)].join(', ')
+    );
+  }
 }
 </script>
+
+<!-- Dein Overlay-Text-Script einbinden -->
+<script src="overlay-text.js"></script>
 
 </body>
 </html>
