@@ -1,3 +1,4 @@
+/* Blurred Overlay mit rechteckigem Sichtfenster */
 body::before {
   content: "";
   position: fixed;
@@ -7,9 +8,11 @@ body::before {
   z-index: 100;
   pointer-events: none;
 
+  /* Hintergrund: Blur + heller */
   backdrop-filter: blur(8px) brightness(1.4);
   -webkit-backdrop-filter: blur(8px) brightness(1.4);
 
+  /* Rechteckige Maske zentriert */
   mask: 
     linear-gradient(black, black) content-box, 
     linear-gradient(black, black);
@@ -18,8 +21,7 @@ body::before {
     linear-gradient(black, black);
   mask-composite: exclude;
   -webkit-mask-composite: destination-out;
-
-  padding: 10vh 5vw 5vh 25vw; /* top right bottom left */
+  padding: 20vh 20vw; /* ⬅︎ Sichtfenstergröße */
   box-sizing: border-box;
 }
 
