@@ -12,7 +12,7 @@ body::before {
   backdrop-filter: blur(8px) brightness(1.4);
   -webkit-backdrop-filter: blur(8px) brightness(1.4);
 
-  /* Rechteckige Maske zentriert */
+  /* Rechteckige Maske mit Abstand zum Rand */
   mask: 
     linear-gradient(black, black) content-box, 
     linear-gradient(black, black);
@@ -21,19 +21,21 @@ body::before {
     linear-gradient(black, black);
   mask-composite: exclude;
   -webkit-mask-composite: destination-out;
-  padding: 20vh 20vw; /* ⬅︎ Sichtfenstergröße */
+
+  /* Abstand zum Rand: oben 6vh, rechts 2vw, unten 2vh, links 2vw */
+  padding: 6vh 2vw 2vh 2vw;
   box-sizing: border-box;
 }
 
-/* Weiße Linienrahmen an den Ecken */
+/* Weiße Linienrahmen an den Ecken - exakt passend zum Cutout */
 body::after {
   content: "";
   position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 60vw;
-  height: 60vh;
-  transform: translate(-50%, -50%);
+  /* Cutout position entspricht padding oben+links als Abstand */
+  top: 6vh;
+  left: 2vw;
+  width: calc(100vw - 4vw);  /* Gesamtbreite minus links+rechts Abstand */
+  height: calc(100vh - 8vh); /* Gesamthöhe minus oben+unten Abstand */
   z-index: 101;
   pointer-events: none;
 
