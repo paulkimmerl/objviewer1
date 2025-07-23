@@ -1,69 +1,86 @@
-html, body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background: #111;
-  touch-action: none;
-}
-
-/* Overlay mit Blur und Glas-Look */
-body::before {
-  content: "";
+/* Haupt-Overlay: Blur mit klarem Cut und Glas-Effekt */
+.overlay-frame {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 100;
+  inset: 0;
   pointer-events: none;
-
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-
-  /* Leicht hellgraue milchige Tönung */
-  background-color: rgba(255, 255, 255, 0.08);
-
-  /* Rechteckiger transparenter Ausschnitt */
-  mask:
-    linear-gradient(black, black) content-box,
-    linear-gradient(black, black);
-  -webkit-mask:
-    linear-gradient(black, black) content-box,
-    linear-gradient(black, black);
-  mask-composite: exclude;
-  -webkit-mask-composite: destination-out;
-
-  padding: 20vh 20vw; /* definiert die Größe des sichtbaren Fensters */
-  box-sizing: border-box;
-  border: none;
-}
-
-/* Linien an den Ecken des Fensters */
-.overlay-lines {
-  position: fixed;
-  top: 20vh;
-  left: 20vw;
-  width: 60vw;
-  height: 60vh;
-  z-index: 101;
-  pointer-events: none;
-}
-
-.overlay-lines::before,
-.overlay-lines::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 2px solid rgba(255, 255, 255, 0.2); /* dezente Linien */
-  border-radius: 4px;
-  clip-path: polygon(
-    0% 0%, 4% 0%, 4% 2%, 2% 2%, 2% 4%, 0% 4%, 
-    0% 0%, 
-    100% 0%, 96% 0%, 96% 2%, 98% 2%, 98% 4%, 100% 4%,
-    100% 0%, 
-    100% 100%, 96% 100%, 96% 98%, 98% 98%, 98% 96%, 100% 96%,
-    100% 100%, 
-    0% 100%, 4% 100%, 4% 98%, 2% 98%, 2% 96%, 0% 96%,
-    0% 100%
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.02); /* heller für Glasgefühl */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  mask-image: radial-gradient(
+    ellipse at center,
+    black 300px,
+    transparent 360px
   );
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    black 300px,
+    transparent 360px
+  );
+}
+
+/* Kreuzlinien (vertikal + horizontal) */
+.overlay-frame::before,
+.overlay-frame::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+.overlay-frame::before {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.overlay-frame::after {
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+/* Rahmenecken als kleine Liniensegmente */
+.overlay-frame::part(corner-tl),
+.overlay-frame::part(corner-tr),
+.overlay-frame::part(corner-bl),
+.overlay-frame::part(corner-br) {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
+
+.overlay-frame::part(corner-tl) {
+  top: 1rem;
+  left: 1rem;
+  border-right: none;
+  border-bottom: none;
+}
+
+.overlay-frame::part(corner-tr) {
+  top: 1rem;
+  right: 1rem;
+  border-left: none;
+  border-bottom: none;
+}
+
+.overlay-frame::part(corner-bl) {
+  bottom: 1rem;
+  left: 1rem;
+  border-right: none;
+  border-top: none;
+}
+
+.overlay-frame::part(corner-br) {
+  bottom: 1rem;
+  right: 1rem;
+  border-left: none;
+  border-top: none;
 }
