@@ -1,3 +1,11 @@
+/* CSS-Variablen für den Abstand des Sichtfensters */
+:root {
+  --overlay-padding-top: 12vh;
+  --overlay-padding-right: 4vw;
+  --overlay-padding-bottom: 10vh;
+  --overlay-padding-left: 4vw;
+}
+
 /* Blurred Overlay mit rechteckigem Sichtfenster */
 body::before {
   content: "";
@@ -8,45 +16,51 @@ body::before {
   z-index: 100;
   pointer-events: none;
 
-  /* Hintergrund: Blur + heller */
   backdrop-filter: blur(8px) brightness(1.4);
   -webkit-backdrop-filter: blur(8px) brightness(1.4);
 
-  /* Rechteckige Maske mit größerem Abstand zum Rand */
-  mask: 
-    linear-gradient(black, black) content-box, 
+  /* Rechteckige Maske mit definiertem Abstand */
+  padding: var(--overlay-padding-top) var(--overlay-padding-right) var(--overlay-padding-bottom) var(--overlay-padding-left);
+  box-sizing: border-box;
+
+  mask:
+    linear-gradient(black, black) content-box,
     linear-gradient(black, black);
-  -webkit-mask: 
-    linear-gradient(black, black) content-box, 
+  -webkit-mask:
+    linear-gradient(black, black) content-box,
     linear-gradient(black, black);
   mask-composite: exclude;
   -webkit-mask-composite: destination-out;
-
-  /* Abstand: oben 12vh, rechts 4vw, unten 10vh, links 4vw */
-  padding: 12vh 4vw 10vh 4vw;
-  box-sizing: border-box;
 }
 
-/* Weiße Linienrahmen an den Ecken - passend zum Cutout */
+/* Weiße Linienrahmen an den Ecken - passend zum Sichtfenster */
 body::after {
   content: "";
   position: fixed;
-  top: 12vh;
-  left: 4vw;
-  width: calc(100vw - 8vw);  /* Gesamtbreite minus links+rechts */
-  height: calc(100vh - 22vh); /* Gesamthöhe minus oben+unten */
+  top: var(--overlay-padding-top);
+  left: var(--overlay-padding-left);
+  width: calc(100vw - (var(--overlay-padding-left) + var(--overlay-padding-right)));
+  height: calc(100vh - (var(--overlay-padding-top) + var(--overlay-padding-bottom)));
   z-index: 101;
   pointer-events: none;
 
   background:
+    /* obere linke Ecke */
     linear-gradient(to right, white 30px, transparent 0) top left,
     linear-gradient(to bottom, white 30px, transparent 0) top left,
+
+    /* obere rechte Ecke */
     linear-gradient(to left, white 30px, transparent 0) top right,
     linear-gradient(to bottom, white 30px, transparent 0) top right,
+
+    /* untere linke Ecke */
     linear-gradient(to right, white 30px, transparent 0) bottom left,
     linear-gradient(to top, white 30px, transparent 0) bottom left,
+
+    /* untere rechte Ecke */
     linear-gradient(to left, white 30px, transparent 0) bottom right,
     linear-gradient(to top, white 30px, transparent 0) bottom right;
+  
   background-repeat: no-repeat;
   background-size: 30px 2px, 2px 30px;
 }
