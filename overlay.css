@@ -1,0 +1,23 @@
+/* Overlay-Rahmen mit Blur-Effekt */
+#blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  mask-image: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    black 55%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    black 55%
+  );
+  background: rgba(0, 0, 0, 0.25); /* leichter Tönungseffekt */
+}
