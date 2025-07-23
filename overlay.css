@@ -1,16 +1,17 @@
-/* Blurred Overlay mit rechteckigem Sichtfenster */
+/* === BLUR-OVERLAY mit zentralem Cutout === */
 body::before {
   content: "";
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: 100;
   pointer-events: none;
 
   backdrop-filter: blur(8px) brightness(1.4);
   -webkit-backdrop-filter: blur(8px) brightness(1.4);
 
-  mask: 
+  mask:
     linear-gradient(black, black) content-box,
     linear-gradient(black, black);
   -webkit-mask:
@@ -19,61 +20,62 @@ body::before {
   mask-composite: exclude;
   -webkit-mask-composite: destination-out;
 
-  padding: 12vh 4vw 10vh 4vw;
+  /* Der Sichtbereich in der Mitte */
+  padding: 30vh 5vw 30vh 5vw;  /* top/right/bottom/left */
   box-sizing: border-box;
 }
 
-/* Weiße (dünne) Linienrahmen an den Ecken */
+/* === LINIEN-CUTOUT (dünn & zentriert) === */
 body::after {
   content: "";
   position: fixed;
-  top: 12vh;
-  left: 4vw;
-  width: calc(100vw - 8vw);
-  height: calc(100vh - 22vh);
+  top: 30vh;
+  left: 5vw;
+  width: 90vw;
+  height: 40vh;  /* 100 - 30 oben - 30 unten */
   z-index: 101;
   pointer-events: none;
 
   background:
-    linear-gradient(to right, white 12px, transparent 0) top left,
-    linear-gradient(to bottom, white 12px, transparent 0) top left,
-    linear-gradient(to left, white 12px, transparent 0) top right,
-    linear-gradient(to bottom, white 12px, transparent 0) top right,
-    linear-gradient(to right, white 12px, transparent 0) bottom left,
-    linear-gradient(to top, white 12px, transparent 0) bottom left,
-    linear-gradient(to left, white 12px, transparent 0) bottom right,
-    linear-gradient(to top, white 12px, transparent 0) bottom right;
+    linear-gradient(to right, white 10px, transparent 0) top left,
+    linear-gradient(to bottom, white 10px, transparent 0) top left,
+    linear-gradient(to left, white 10px, transparent 0) top right,
+    linear-gradient(to bottom, white 10px, transparent 0) top right,
+    linear-gradient(to right, white 10px, transparent 0) bottom left,
+    linear-gradient(to top, white 10px, transparent 0) bottom left,
+    linear-gradient(to left, white 10px, transparent 0) bottom right,
+    linear-gradient(to top, white 10px, transparent 0) bottom right;
   background-repeat: no-repeat;
-  background-size: 12px 1px, 1px 12px;
+  background-size: 10px 1px, 1px 10px;
 }
 
-/* Text oben links */
+/* === TEXT OBEN IM GEBLURRTEN BEREICH === */
 html::before {
-  content: "PAUL KIMMERL\npaul-kimmerl@gmx.de";
+  content: "PAUL KIMMERL\A paul-kimmerl@gmx.de";
+  white-space: pre-line;
   position: fixed;
-  top: 2vh;
-  left: 4vw;
+  top: 5vh;
+  left: 5vw;
   color: #aaa;
-  font-family: "Arial", sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 0.65rem;
   font-weight: 400;
-  white-space: pre-line;
-  line-height: 1.3;
+  line-height: 1.5;
   z-index: 102;
   pointer-events: none;
   user-select: none;
   text-transform: uppercase;
 }
 
-/* Text unten mittig */
+/* === TEXT UNTEN IM GEBLURRTEN BEREICH === */
 html::after {
   content: "verloren zwischen Chaos und Kontrolle – in Liebe zur Ästhetik des Unbewussten";
   position: fixed;
-  bottom: 2vh;
+  bottom: 5vh;
   left: 50%;
   transform: translateX(-50%);
   color: #aaa;
-  font-family: "Arial", sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 0.6rem;
   font-weight: 400;
   text-align: center;
