@@ -1,38 +1,33 @@
-/* Blurred Overlay mit rechteckigem Sichtfenster */
+/* Blur + Cutout Mask auf body::before */
 body::before {
   content: "";
   position: fixed;
   top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100vw; height: 100vh;
   z-index: 100;
   pointer-events: none;
 
-  /* Hintergrund: Blur + heller */
   backdrop-filter: blur(8px) brightness(1.4);
   -webkit-backdrop-filter: blur(8px) brightness(1.4);
 
-  /* Rechteckige Maske mit größerem Abstand zum Rand */
   mask: 
-    linear-gradient(black, black) content-box, 
+    linear-gradient(black, black) content-box,
     linear-gradient(black, black);
-  -webkit-mask: 
-    linear-gradient(black, black) content-box, 
+  -webkit-mask:
+    linear-gradient(black, black) content-box,
     linear-gradient(black, black);
   mask-composite: exclude;
   -webkit-mask-composite: destination-out;
 
-  /* Abstand: oben 12vh, rechts 4vw, unten 10vh, links 4vw */
   padding: 12vh 4vw 10vh 4vw;
   box-sizing: border-box;
 }
 
-/* Weiße Linienrahmen an den Ecken - dünner und feiner */
+/* Weiße Linien an den Ecken - body::after */
 body::after {
   content: "";
   position: fixed;
-  top: 12vh;
-  left: 4vw;
+  top: 12vh; left: 4vw;
   width: calc(100vw - 8vw);
   height: calc(100vh - 22vh);
   z-index: 101;
@@ -51,14 +46,9 @@ body::after {
   background-size: 12px 1px, 1px 12px;
 }
 
-/* Text oben als Pseudo-Element */
-body::before {
-  position: fixed;
-  z-index: 102;
-}
-
-body::before::before {
-  content: "Paul Kimmerl (bolt) \A paul-kimmerl@gmx.de";
+/* Text oben und unten im html::before (kein Maskenproblem) */
+html::before {
+  content: "Paul Kimmerl (bolt)\A paul-kimmerl@gmx.de";
   white-space: pre-line;
   position: fixed;
   top: 2vh;
@@ -67,18 +57,15 @@ body::before::before {
   font-family: "Times New Roman", serif;
   font-size: 0.8rem;
   font-weight: 300;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
   pointer-events: none;
   user-select: none;
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  z-index: 102;
+  max-width: 40vw;
 }
 
-/* Text unten als Pseudo-Element */
-body::after {
-  position: fixed;
-  z-index: 103;
-}
-
-body::after::after {
+/* Unterer Text als html::after */
+html::after {
   content: "verloren zwischen Chaos und Kontrolle - in Liebe zur Ästhetik des Unbewussten";
   position: fixed;
   bottom: 2vh;
@@ -87,9 +74,11 @@ body::after::after {
   font-family: "Times New Roman", serif;
   font-size: 0.8rem;
   font-weight: 300;
+  text-align: right;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
   pointer-events: none;
   user-select: none;
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
-  max-width: 400px;
-  text-align: right;
+  z-index: 102;
+  max-width: 40vw;
+  white-space: normal;
 }
