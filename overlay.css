@@ -1,4 +1,4 @@
-/* === BLUR-OVERLAY mit zentralem Cutout === */
+/* === BLUR-OVERLAY mit größerem Sichtfenster === */
 body::before {
   content: "";
   position: fixed;
@@ -20,19 +20,19 @@ body::before {
   mask-composite: exclude;
   -webkit-mask-composite: destination-out;
 
-  /* Der Sichtbereich in der Mitte */
-  padding: 30vh 5vw 30vh 5vw;  /* top/right/bottom/left */
+  /* Größeres Sichtfenster */
+  padding: 15vh 2vw 15vh 2vw;
   box-sizing: border-box;
 }
 
-/* === LINIEN-CUTOUT (dünn & zentriert) === */
+/* === RAHMEN im Sichtfenster (angepasst) === */
 body::after {
   content: "";
   position: fixed;
-  top: 30vh;
-  left: 5vw;
-  width: 90vw;
-  height: 40vh;  /* 100 - 30 oben - 30 unten */
+  top: 15vh;
+  left: 2vw;
+  width: 96vw;
+  height: calc(100vh - 30vh); /* 100 - oben - unten */
   z-index: 101;
   pointer-events: none;
 
@@ -49,29 +49,29 @@ body::after {
   background-size: 10px 1px, 1px 10px;
 }
 
-/* === TEXT OBEN IM GEBLURRTEN BEREICH === */
+/* === OBEN: Text im Blurbereich === */
 html::before {
   content: "PAUL KIMMERL\A paul-kimmerl@gmx.de";
   white-space: pre-line;
   position: fixed;
-  top: 5vh;
-  left: 5vw;
+  top: 4vh;
+  left: 2vw;
   color: #aaa;
   font-family: Arial, sans-serif;
   font-size: 0.65rem;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.4;
   z-index: 102;
   pointer-events: none;
   user-select: none;
   text-transform: uppercase;
 }
 
-/* === TEXT UNTEN IM GEBLURRTEN BEREICH === */
+/* === UNTEN: Text im Blurbereich === */
 html::after {
   content: "verloren zwischen Chaos und Kontrolle – in Liebe zur Ästhetik des Unbewussten";
   position: fixed;
-  bottom: 5vh;
+  bottom: 4vh;
   left: 50%;
   transform: translateX(-50%);
   color: #aaa;
