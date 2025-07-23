@@ -1,4 +1,3 @@
-/* Basis-Styles */
 html, body {
   margin: 0;
   padding: 0;
@@ -7,23 +6,23 @@ html, body {
   touch-action: none;
 }
 
-/* Blurred Overlay mit Cutout-Fenster und milchigem Rahmen */
+/* Overlay mit Blur und Glas-Look */
 body::before {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   width: 100vw;
   height: 100vh;
   z-index: 100;
   pointer-events: none;
 
-  /* Hintergrund-Blurring + milchige Tönung */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  background-color: rgba(200, 200, 200, 0.05); /* milchig hellgrau */
 
-  /* Rechteckiger Sichtbereich (Cutout) */
+  /* Leicht hellgraue milchige Tönung */
+  background-color: rgba(255, 255, 255, 0.08);
+
+  /* Rechteckiger transparenter Ausschnitt */
   mask:
     linear-gradient(black, black) content-box,
     linear-gradient(black, black);
@@ -33,13 +32,13 @@ body::before {
   mask-composite: exclude;
   -webkit-mask-composite: destination-out;
 
-  /* Größe und Position des Sichtfensters */
-  padding: 20vh 20vw; /* Sichtausschnitt: 60% Breite, 60% Höhe */
+  padding: 20vh 20vw; /* definiert die Größe des sichtbaren Fensters */
   box-sizing: border-box;
+  border: none;
 }
 
-/* Optional: Visuelle Linien (Zielrahmen) */
-.overlay-frame {
+/* Linien an den Ecken des Fensters */
+.overlay-lines {
   position: fixed;
   top: 20vh;
   left: 20vw;
@@ -47,6 +46,24 @@ body::before {
   height: 60vh;
   z-index: 101;
   pointer-events: none;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-sizing: border-box;
+}
+
+.overlay-lines::before,
+.overlay-lines::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.2); /* dezente Linien */
+  border-radius: 4px;
+  clip-path: polygon(
+    0% 0%, 4% 0%, 4% 2%, 2% 2%, 2% 4%, 0% 4%, 
+    0% 0%, 
+    100% 0%, 96% 0%, 96% 2%, 98% 2%, 98% 4%, 100% 4%,
+    100% 0%, 
+    100% 100%, 96% 100%, 96% 98%, 98% 98%, 98% 96%, 100% 96%,
+    100% 100%, 
+    0% 100%, 4% 100%, 4% 98%, 2% 98%, 2% 96%, 0% 96%,
+    0% 100%
+  );
 }
