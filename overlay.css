@@ -1,4 +1,13 @@
-/* Blurred Overlay mit rechteckigem Sichtfenster */
+/* Basis-Styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #111;
+  touch-action: none;
+}
+
+/* Blurred Overlay mit Cutout-Fenster und milchigem Rahmen */
 body::before {
   content: "";
   position: fixed;
@@ -9,74 +18,35 @@ body::before {
   z-index: 100;
   pointer-events: none;
 
-  /* Hintergrund: Blur */
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-
-  /* Sichtfenster-Maske */
-  mask: radial-gradient(
-    transparent 0%,
-    transparent 49.9%,
-    black 50%,
-    black 100%
-  );
-  -webkit-mask: radial-gradient(
-    transparent 0%,
-    transparent 49.9%,
-    black 50%,
-    black 100%
-  );
-  mask-composite: exclude;
-  -webkit-mask-composite: destination-out;
-}
-
-/* Alternativ mit rechteckiger Maske (mittig): */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 100;
-  pointer-events: none;
-
+  /* Hintergrund-Blurring + milchige Tönung */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(200, 200, 200, 0.05); /* milchig hellgrau */
 
-  /* Rechteckige Maske zentriert */
-  mask: 
-    linear-gradient(black, black) content-box, 
+  /* Rechteckiger Sichtbereich (Cutout) */
+  mask:
+    linear-gradient(black, black) content-box,
     linear-gradient(black, black);
-  -webkit-mask: 
-    linear-gradient(black, black) content-box, 
+  -webkit-mask:
+    linear-gradient(black, black) content-box,
     linear-gradient(black, black);
   mask-composite: exclude;
   -webkit-mask-composite: destination-out;
-  padding: 20vh 20vw; /* ⬅︎ Sichtfenstergröße */
+
+  /* Größe und Position des Sichtfensters */
+  padding: 20vh 20vw; /* Sichtausschnitt: 60% Breite, 60% Höhe */
   box-sizing: border-box;
 }
 
-/* Weiße Linienrahmen an den Ecken */
-body::after {
-  content: "";
+/* Optional: Visuelle Linien (Zielrahmen) */
+.overlay-frame {
   position: fixed;
-  top: 50%;
-  left: 50%;
+  top: 20vh;
+  left: 20vw;
   width: 60vw;
   height: 60vh;
-  transform: translate(-50%, -50%);
   z-index: 101;
   pointer-events: none;
-
-  background:
-    linear-gradient(to right, white 30px, transparent 0) top left,
-    linear-gradient(to bottom, white 30px, transparent 0) top left,
-    linear-gradient(to left, white 30px, transparent 0) top right,
-    linear-gradient(to bottom, white 30px, transparent 0) top right,
-    linear-gradient(to right, white 30px, transparent 0) bottom left,
-    linear-gradient(to top, white 30px, transparent 0) bottom left,
-    linear-gradient(to left, white 30px, transparent 0) bottom right,
-    linear-gradient(to top, white 30px, transparent 0) bottom right;
-  background-repeat: no-repeat;
-  background-size: 30px 2px, 2px 30px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-sizing: border-box;
 }
