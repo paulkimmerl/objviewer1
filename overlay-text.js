@@ -1,30 +1,30 @@
 (() => {
-  // CSS als String
+  // CSS als String (vereinfacht, klassisch, klein, grau, untereinander)
   const css = `
   #overlay-text {
     position: fixed;
-    top: 2vh;
-    left: 2vw;
+    top: 10px;
+    left: 10px;
     z-index: 101;
     pointer-events: auto;
 
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: #0ff;
-    text-shadow:
-      0 0 5px #0ff,
-      0 0 10px #0ff,
-      0 0 20px #0ff;
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+    font-size: 12px;
+    color: #888;
     user-select: none;
     white-space: nowrap;
+    line-height: 1.4;
+  }
+  #overlay-text div {
+    margin-bottom: 6px;
   }
   #overlay-text span.label {
-    margin-right: 0.5em;
-    opacity: 0.8;
+    font-weight: bold;
+    margin-right: 5px;
   }
   #overlay-text span.value {
-    font-weight: 900;
+    font-weight: normal;
   }
   `;
 
@@ -33,13 +33,13 @@
   styleTag.textContent = css;
   document.head.appendChild(styleTag);
 
-  // Overlay-HTML erstellen
+  // Overlay-HTML erstellen (jeder Wert in eigenem div für Untereinander)
   const overlayHTML = `
   <div id="overlay-text">
-    <span class="label">Zoom:</span><span id="zoom-val" class="value">100%</span>&nbsp;&nbsp;
-    <span class="label">FPS:</span><span id="fps-val" class="value">60</span>&nbsp;&nbsp;
-    <span class="label">Interaction:</span><span id="interaction-val" class="value">On</span>&nbsp;&nbsp;
-    <span class="label">Parameter:</span><span id="param-val" class="value">42</span>
+    <div><span class="label">Zoom:</span><span id="zoom-val" class="value">100%</span></div>
+    <div><span class="label">FPS:</span><span id="fps-val" class="value">60</span></div>
+    <div><span class="label">Interaction:</span><span id="interaction-val" class="value">On</span></div>
+    <div><span class="label">Parameter:</span><span id="param-val" class="value">42</span></div>
   </div>`;
 
   // Overlay in Body einfügen
