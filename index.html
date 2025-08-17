@@ -1,120 +1,356 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-  <meta charset="utf-8">
-  <title>3D Viewer – Dezente Wanderlichter</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="three.js"></script>
-  <script src="Detector.js"></script>
-  <script src="OrbitControls.js"></script>
-  <script src="OBJLoader.js"></script>
-  <div id="blur-overlay"></div>
-  <link rel="stylesheet" href="overlay.css">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: #111;
-      touch-action: none;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smooth Overlay Pause Endless</title>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+#tunnel-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  z-index: 0;
+  pointer-events: auto; /* Hintergrund immer interaktiv */
+}
+
+#overlay-system {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  touch-action: none;
+  transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transform: translateX(0);
+}
+
+#overlay-system.paused {
+  transform: translateX(60%);
+}
+
+.page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-origin: center center;
+  transition: transform 0.6s ease, opacity 0.6s ease;
+  opacity: 0;
+  transform: scale(0);
+  z-index: 1;
+}
+
+.title {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: #ccc;
+  font-size: 2rem;
+  text-shadow: 1px 1px 5px black;
+  z-index: 10;
+  transition: opacity 0.6s ease;
+}
+
+.iframe-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  transition: transform 0.6s ease, opacity 0.6s ease;
+  transform-origin: center center;
+  transform: scale(0.6);
+}
+
+.iframe-container.active {
+  transform: scale(1.2);
+  z-index: 999;
+}
+
+.iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  pointer-events: none;
+  filter: blur(5px);
+  transition: filter 0.6s ease;
+}
+
+.iframe-container.active iframe {
+  pointer-events: auto;
+  filter: blur(0);
+}
+
+.click-overlay {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  z-index: 20;
+  transition: opacity 0.6s ease;
+}
+
+.click-overlay.hidden-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#overlay-controller {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  cursor: pointer;
+}
+#overlay-controller.active {
+  pointer-events: auto;
+}
+
+/* Startseite Rahmen */
+.start-frame {
+  border: 4px solid #ccc;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>
 </head>
 <body>
 
+<iframe id="tunnel-background" src="https://paulkimmerl.github.io/tunnel/"></iframe>
+
+<div id="overlay-system"></div>
+<div id="overlay-controller"></div>
+
 <script>
-if (!Detector.webgl) Detector.addGetWebGLMessage();
+const overlaySystem = document.getElementById("overlay-system");
+const overlayController = document.getElementById("overlay-controller");
 
-let container, camera, controls, scene, renderer;
-let light1, light2, light3;
-let time = 0;
+// ==== Originale Seiten ====
+const originalPagesData = [
+  {title: "Start"},
+  {title: "Webseite", src: "https://paulkimmerl.github.io/paulkimmerl/"},
+  {title: "Test Seite", src: "https://paulkimmerl.github.io/s/"},
+  {title: "Objviewer", src: "https://paulkimmerl.github.io/objviewer1/"},
+  {title: "Intermediate", src: "https://www.liovast.com/umkrempler"}
+];
 
-init();
-animate();
+let pages = [];
+let currentPage = 0;
 
-function init() {
-  container = document.createElement('div');
-  document.body.appendChild(container);
+// ==== Funktion um Page zu erstellen ====
+function createPage(data) {
+  const page = document.createElement("div");
+  page.classList.add("page");
 
-  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.z = 7;
+  if(data.src) {
+    const container = document.createElement("div");
+    container.classList.add("iframe-container");
 
-  scene = new THREE.Scene();
+    const iframe = document.createElement("iframe");
+    iframe.src = data.src;
 
-  // Gedimmte weiße wandernde Punktlichter
-  light1 = new THREE.PointLight(0xffffff, 0.8, 10);  // Heller als vorher
-  light2 = new THREE.PointLight(0xffffff, 0.15, 10);
-  light3 = new THREE.PointLight(0xffffff, 0.05, 10); // Startwert sehr gedimmt
+    const overlay = document.createElement("div");
+    overlay.classList.add("click-overlay");
 
-  scene.add(light1);
-  scene.add(light2);
-  scene.add(light3);
+    const title = document.createElement("div");
+    title.classList.add("title");
+    title.textContent = data.title;
 
-  // Modell laden
-  const loader = new THREE.OBJLoader();
-  loader.setPath('assets/');
-  loader.load('model.obj', function (object) {
-    scene.add(object);
-  });
+    container.appendChild(iframe);
+    container.appendChild(overlay);
+    container.appendChild(title);
+    page.appendChild(container);
 
-  // Renderer
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  container.appendChild(renderer.domElement);
+    // Click Overlay
+    overlay.addEventListener("click", e => {
+      e.stopPropagation();
+      if(overlaySystem.classList.contains("paused")) return;
 
-  // Steuerung
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.1;
-  controls.enableZoom = true;
+      document.querySelectorAll(".iframe-container").forEach(c=>{
+        c.classList.remove("active");
+        c.querySelector(".click-overlay").classList.remove("hidden-overlay");
+        c.querySelector("iframe").style.pointerEvents = "none";
+        const t = c.querySelector(".title");
+        if(t) t.style.opacity = 1;
+      });
 
-  window.addEventListener('resize', onWindowResize, false);
-}
+      container.classList.add("active");
+      overlay.classList.add("hidden-overlay");
+      iframe.style.pointerEvents = "auto";
+      title.style.opacity = 0;
+    });
 
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-  time += 0.01;
-
-  // light1 etwas heller und bewegt sich
-  light1.intensity = 0.8;
-  light1.position.set(Math.sin(time * 1.5) * 1.5, Math.cos(time * 1.0) * 1.5, Math.sin(time) * 1.5);
-
-  // light2 normal
-  light2.intensity = 0.15;
-  light2.position.set(Math.cos(time * 1.3) * 1.2, Math.sin(time * 0.8) * 1.5, Math.cos(time) * 1.2);
-
-  // Strobo light3 mit random Blink
-  if (Math.random() < 0.01 && light3.intensity < 0.05) {
-    light3.intensity = 1.0; // Blitz starten
+    document.addEventListener("click", e => {
+      if(overlaySystem.classList.contains("paused")) return;
+      if(!container.contains(e.target)){
+        container.classList.remove("active");
+        overlay.classList.remove("hidden-overlay");
+        iframe.style.pointerEvents = "none";
+        title.style.opacity = 1;
+      }
+    });
   } else {
-    light3.intensity *= 0.95; // sanft dimmen
-    if (light3.intensity < 0.05) light3.intensity = 0.05; // Mindesthelligkeit
+    // Startseite mit Rahmen
+    const frame = document.createElement("div");
+    frame.classList.add("start-frame");
+    frame.textContent = "Archiv"; // Einfacher Text im Rahmen
+    page.appendChild(frame);
   }
-  light3.position.set(Math.sin(time * 1.1) * 1.0, Math.cos(time * 1.2) * 1.0, Math.sin(time * 0.5) * 1.5);
 
-  controls.update();
-  renderer.render(scene, camera);
+  overlaySystem.appendChild(page);
+  return page;
+}
 
-  // Update Overlay Text mit aktuellen Werten
-  if (typeof updateOverlayText === 'function') {
-    updateOverlayText(
-      (controls.getDistance ? controls.getDistance().toFixed(2) + 'm' : 'N/A'),
-      Math.round(renderer.info.render.frame / ((performance.now()/1000)||1)) + ' FPS',
-      controls.enabled ? 'On' : 'Off',
-      'Lights: ' + [light1.intensity.toFixed(2), light2.intensity.toFixed(2), light3.intensity.toFixed(2)].join(', ')
-    );
+// ==== Alle Originalseiten erstellen ====
+originalPagesData.forEach(d=>{
+  const p = createPage(d);
+  pages.push(p);
+});
+
+// ==== Layout/Animation ====
+function showPage(index) {
+  pages.forEach((page,i)=>{
+    if(i === index){
+      page.style.transform = `scale(0.6)`;
+      page.style.opacity = 1;
+      page.style.zIndex = 100;
+    } else if(i < index){
+      page.style.transform = `scale(1.2)`;
+      page.style.opacity = 0;
+      page.style.zIndex = 50;
+    } else {
+      page.style.transform = `scale(0)`;
+      page.style.opacity = 0;
+      page.style.zIndex = 0;
+    }
+  });
+}
+
+showPage(currentPage);
+
+// ==== Endless Loop: neue Fake-Seiten erzeugen ====
+function ensureNextPage() {
+  if(currentPage >= pages.length - 2){
+    originalPagesData.slice(1).forEach(d=>{
+      const p = createPage(d);
+      pages.push(p);
+    });
   }
 }
-</script>
 
-<!-- Dein Overlay-Text-Script einbinden -->
-<script src="overlay-text.js"></script>
+// ==== Scroll / Wheel ====
+window.addEventListener('wheel', e=>{
+  if(overlaySystem.classList.contains("paused")) return;
+  if(e.deltaY > 0) currentPage++;
+  else if(e.deltaY < 0 && currentPage>0) currentPage--;
+  ensureNextPage();
+  showPage(currentPage);
+});
+
+// ==== Touch Scroll ====
+let touchStartY = 0;
+window.addEventListener('touchstart', e => touchStartY = e.touches[0].clientY);
+window.addEventListener('touchend', e => {
+  if(overlaySystem.classList.contains("paused")) return;
+  let touchEndY = e.changedTouches[0].clientY;
+  if(touchStartY > touchEndY + 10) currentPage++;
+  else if(touchStartY < touchEndY - 10 && currentPage>0) currentPage--;
+  ensureNextPage();
+  showPage(currentPage);
+});
+
+// ==== Drag Overlay ====
+let startX = 0, currentX = 0, dragging = false;
+overlaySystem.addEventListener("mousedown", startDrag);
+overlaySystem.addEventListener("touchstart", startDrag);
+window.addEventListener("mousemove", moveDrag);
+overlaySystem.addEventListener("touchmove", moveDrag);
+window.addEventListener("mouseup", endDrag);
+overlaySystem.addEventListener("touchend", endDrag);
+
+function startDrag(e){
+  if(!e.target.classList.contains("click-overlay")) return;
+  dragging = true;
+  startX = e.clientX || e.touches[0].clientX;
+  overlaySystem.style.transition = "none";
+}
+function moveDrag(e){
+  if(!dragging) return;
+  currentX = (e.clientX || e.touches[0].clientX) - startX;
+  if(currentX > 0) overlaySystem.style.transform = `translateX(${currentX}px)`;
+}
+function endDrag(){
+  if(!dragging) return;
+  dragging = false;
+  overlaySystem.style.transition = "transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)";
+  if(currentX > window.innerWidth/3){
+    overlaySystem.classList.add("paused");
+    document.querySelectorAll(".iframe-container").forEach(c=>c.querySelector("iframe").style.pointerEvents = "none");
+  } else {
+    overlaySystem.classList.remove("paused");
+    document.querySelectorAll(".iframe-container").forEach(c=>{
+      c.querySelector("iframe").style.pointerEvents = c.classList.contains("active") ? 'auto' : 'none';
+    });
+  }
+  overlaySystem.style.transform = "";
+  updateController();
+}
+
+// ==== Overlay Controller ====
+function updateController() {
+  if(overlaySystem.classList.contains('paused')){
+    overlayController.classList.add('active');
+  } else {
+    overlayController.classList.remove('active');
+  }
+}
+
+overlayController.addEventListener('click', e=>{
+  if(overlaySystem.classList.contains('paused')){
+    overlaySystem.classList.remove('paused');
+    document.querySelectorAll(".iframe-container").forEach(c=>{
+      const overlay = c.querySelector(".click-overlay");
+      const iframe = c.querySelector("iframe");
+      const title = c.querySelector(".title");
+      if(!c.classList.contains("active")){
+        overlay.style.pointerEvents = 'auto';
+        overlay.classList.remove("hidden-overlay");
+        iframe.style.pointerEvents = 'none';
+        title.style.opacity = 1;
+      }
+    });
+    updateController();
+  }
+});
+
+// ==== Klick Overlay zurück ====
+overlaySystem.addEventListener('click', e=>{
+  if(overlaySystem.classList.contains('paused')){
+    overlaySystem.classList.remove('paused');
+    document.querySelectorAll(".iframe-container").forEach(c=>{
+      c.querySelector("iframe").style.pointerEvents = c.classList.contains("active") ? 'auto' : 'none';
+    });
+    updateController();
+    e.stopPropagation();
+  }
+});
+</script>
 
 </body>
 </html>
